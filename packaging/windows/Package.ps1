@@ -3,6 +3,8 @@ param(
     [string]$MsysRoot = 'C:\msys64'
 )
 $ErrorActionPreference = 'Stop'
+New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
+$OutputDirectory = (Resolve-Path -LiteralPath $OutputDirectory).Path
 $sourceRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $platform = Join-Path $sourceRoot 'platforms/mingw64GccDPInt32Opt'
 $revision = (& git -C $sourceRoot rev-parse --short=12 HEAD).Trim()

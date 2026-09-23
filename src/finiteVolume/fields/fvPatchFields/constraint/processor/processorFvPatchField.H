@@ -302,6 +302,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#ifdef _WIN32
+    // Declare scalar specialisations before derived patch types instantiate the
+    // generic methods. PE/COFF cannot merge those conflicting definitions.
+    #include "processorFvPatchScalarField.H"
+#endif
+
 #ifdef NoRepository
     #include "processorFvPatchField.C"
 #endif
