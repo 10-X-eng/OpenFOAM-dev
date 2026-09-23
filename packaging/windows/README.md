@@ -9,6 +9,37 @@ The initial package targets **double precision, 32-bit labels, serial CFD**:
 replacement for the upstream distribution. MPI, ParaView, runtime compilation,
 and the remaining solver modules are not included or validated.
 
+## Run the package
+
+Extract the ZIP to a local directory and open `OpenFOAM.cmd`. In the terminal:
+
+```bat
+xcopy "%FOAM_TUTORIALS%\cavity" cavity /E /I
+cd cavity
+blockMesh
+checkMesh
+icoFoam
+```
+
+The cavity tutorial runs 100 time steps to time 0.5. The final velocity and
+pressure fields are in `cavity/0.5`. A native Windows ParaView installation can
+be used separately for visualization.
+
+## Package and verify
+
+After building, run these from PowerShell, using a new output directory:
+
+```powershell
+./packaging/windows/Package.ps1 -OutputDirectory C:\of-packages
+./packaging/windows/SmokeTest.ps1 -PackageDirectory C:\of-packages\OpenFOAM-dev-windows-x64-REVISION
+```
+
+Packaging requires a clean Git commit, generates the matching source archive,
+and checks transitive DLL imports. The smoke test removes developer tools from
+the process PATH, runs portability regression tests, checks the generated mesh,
+and completes the cavity simulation. Build and test logs should be retained
+with the package. The GitHub Actions workflow runs these same steps on Windows.
+
 ## Build
 
 Use a short checkout path on NTFS. Upstream contains case-distinct source
