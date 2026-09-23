@@ -14,3 +14,9 @@ LIB_LIBS = \
     -lfileFormats \
     -ltriSurface \
     -llagrangian
+
+# PE/COFF does not resolve these inline particle-method symbols transitively
+# through lagrangian.dll; record the direct dependency.
+ifeq ($(WM_ARCH),mingw64)
+LIB_LIBS += -ltracking
+endif
