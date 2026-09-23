@@ -1,3 +1,9 @@
+ifeq ($(WM_ARCH),mingw64)
+../Pstream/dummy/UPstream.C
+../Pstream/dummy/UIPread.C
+../Pstream/dummy/UOPwrite.C
+endif
+
 global/global.Cver
 # global/constants/constants.C in global.Cver
 # global/constants/dimensionedConstants.C in global.Cver

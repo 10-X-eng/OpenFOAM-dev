@@ -1,0 +1,8 @@
+# Native Windows x64 (MinGW-w64 UCRT); MSYS2 is a build tool only.
+SO = dll
+PROJECT_LIBS = -lOpenFOAM
+GINC = -I$(WM_PROJECT_DIR)/platforms/windows-include
+GFLAGS += -DWIN64 -DNOMINMAX -D_USE_MATH_DEFINES -DFOAM_USE_STAT -D_FILE_OFFSET_BITS=64 -DLITTLE_ENDIAN
+include $(GENERAL_RULES)/standard
+include $(DEFAULT_RULES)/c
+include $(DEFAULT_RULES)/c++

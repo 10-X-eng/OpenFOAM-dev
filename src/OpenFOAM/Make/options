@@ -1,7 +1,6 @@
-EXE_INC = \
-    -I$(OBJECTS_DIR)
-
-LIB_LIBS = \
-    $(FOAM_LIBBIN)/libOSspecific.o \
-    -L$(FOAM_LIBBIN)/dummy -lPstream \
-    -lz
+EXE_INC = -I$(OBJECTS_DIR)
+ifeq ($(WM_ARCH),mingw64)
+LIB_LIBS = $(FOAM_LIBBIN)/libOSspecific.o -lz -lsystre -lshlwapi -lpsapi -ladvapi32
+else
+LIB_LIBS = $(FOAM_LIBBIN)/libOSspecific.o -L$(FOAM_LIBBIN)/dummy -lPstream -lz
+endif

@@ -57,6 +57,12 @@ class Ostream;
 //- Return a word representation of an int32
 word name(const int32_t);
 
+
+#ifdef _WIN32
+Istream& operator>>(Istream&, long&);
+Ostream& operator<<(Ostream&, const long);
+#endif
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 int32_t readInt32(Istream&);

@@ -27,6 +27,12 @@ License
 
 inline void Foam::fileName::stripInvalid()
 {
+#ifdef _WIN32
+    for (char& c : *this)
+    {
+        if (c == '\\') c = '/';
+    }
+#endif
     if (debug && string::stripInvalid<fileName>(*this))
     {
         std::cerr

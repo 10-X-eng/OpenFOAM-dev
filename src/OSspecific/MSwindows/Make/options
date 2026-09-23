@@ -1,0 +1,2 @@
+# Uses the Windows target's 64-bit file offsets and native Win32 APIs.
+EXE_INC =

@@ -1,0 +1,71 @@
+name: Native Windows serial package
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          sparse-checkout: packaging/windows
+      - name: Prepare case-sensitive source checkout
+        shell: pwsh
+        env:
+          SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}.git
+          SOURCE_REVISION: ${{ github.sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory C:\of-build | Out-Null
+          fsutil.exe file setCaseSensitiveInfo C:\of-build enable
+          if ($LASTEXITCODE) { throw 'Cannot enable case-sensitive source directory.' }
+          git init C:\of-build\OpenFOAM-dev
+          git -C C:\of-build\OpenFOAM-dev config core.longpaths true
+          git -C C:\of-build\OpenFOAM-dev config core.autocrlf false
+          git -C C:\of-build\OpenFOAM-dev config core.ignorecase false
+          git -C C:\of-build\OpenFOAM-dev fetch --depth 1 $env:SOURCE_URL $env:SOURCE_REVISION
+          if ($LASTEXITCODE) { throw 'Source fetch failed.' }
+          git -C C:\of-build\OpenFOAM-dev checkout --detach FETCH_HEAD
+          if ($LASTEXITCODE) { throw 'Source checkout failed.' }
+      - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884
+        id: msys
+        with:
+          msystem: UCRT64
+          location: C:\
+          update: true
+          install: >-
+            git gcc make flex bison
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-zlib
+            mingw-w64-ucrt-x86_64-libsystre
+      - name: Compile Windows executables
+        shell: msys2 {0}
+        run: |
+          set -o pipefail
+          cd /c/of-build/OpenFOAM-dev
+          JOBS=4 bash packaging/windows/build.sh 2>&1 | tee /c/of-build/build.log
+      - name: Package and exercise the Windows-only runtime
+        shell: pwsh
+        env:
+          MSYS_ROOT: ${{ steps.msys.outputs.msys2-location }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $output = Join-Path $env:GITHUB_WORKSPACE 'artifacts'
+          & C:\of-build\OpenFOAM-dev\packaging\windows\Package.ps1 -OutputDirectory $output -MsysRoot $env:MSYS_ROOT
+          $package = Get-ChildItem -LiteralPath $output -Directory | Select-Object -First 1
+          & C:\of-build\OpenFOAM-dev\packaging\windows\SmokeTest.ps1 -PackageDirectory $package.FullName
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: windows-native-build
+          path: |
+            artifacts/*.zip
+            artifacts/*.tar.gz
+            artifacts/**/run/smoke-cavity/log.*
+            C:/of-build/build.log
+          if-no-files-found: warn

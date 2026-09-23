@@ -1,0 +1,14 @@
+SUFFIXES += .C
+CC = g++ -std=c++17
+c++WARN = -Wall -Wextra -Wno-unused-parameter -Wno-invalid-offsetof
+c++LESSWARN = -Wno-unused-local-typedefs
+include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
+ptFLAGS = -DNoRepository -ftemplate-depth-256 -Wa,-mbig-obj
+c++FLAGS = $(GFLAGS) -Wall -Wno-invalid-offsetof $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS)
+Ctoo = $(WM_SCHEDULER) $(CC) $(c++FLAGS) -c $< -o $@
+cxxtoo = $(Ctoo)
+cctoo = $(Ctoo)
+cpptoo = $(Ctoo)
+LINK_LIBS = $(c++DBUG)
+LINKLIBSO = $(CC) -shared -Wl,--export-all-symbols,--out-implib,$(LIB).dll.a
+LINKEXE = $(CC)

@@ -267,7 +267,7 @@ dimensionedScalar func(const dimensionedScalar& ds)                            \
     (                                                                          \
         word(#func"(", ds.name(), ')'),                                        \
         dimless,                                                               \
-        ::func(ds.value())                                                     \
+        Foam::func(ds.value())                                                 \
     );                                                                         \
 }
 
@@ -311,7 +311,7 @@ dimensionedScalar func(const int n, const dimensionedScalar& ds)               \
     (                                                                          \
         word(#func"(", name(n), ',', ds.name(), ')'),                          \
         dimless,                                                               \
-        ::func(n, ds.value())                                                  \
+        Foam::func(n, ds.value())                                              \
     );                                                                         \
 }
 

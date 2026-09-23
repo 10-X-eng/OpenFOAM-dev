@@ -72,6 +72,7 @@ error() {
 
 # Default 'ln' option
 lnOpt="-s"
+if [ "$WM_ARCH" = mingw64 ]; then lnOpt=""; fi
 
 unset update silentOpt
 
@@ -173,6 +174,7 @@ filter()
     shift
 }
 
+if [ "$WM_ARCH" = mingw64 ]; then lnOpt="${lnOpt//s/}"; fi
 mapfile -t pruneNames < <(filter name lnInclude Make config noLink)
 mapfile -t prunePaths < <(find .. -mindepth 2 -type d -name Make -printf '%h\n')
 mapfile -t prunePaths < <(filter path "${prunePaths[@]}")
@@ -181,7 +183,7 @@ mapfile -t matchNames < <(filter name '*.[CHh]' '*.[ch]xx' '*.[ch]pp' '*.type')
 find .. \
     \( "${pruneNames[@]}" -o "${prunePaths[@]}" \) -prune \
     -o \( "${matchNames[@]}" \) \
-    -exec ln $lnOpt {} . \;
+    -exec ln $lnOpt -t . {} +
 
 
 #------------------------------------------------------------------------------

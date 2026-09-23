@@ -57,6 +57,14 @@ class Ostream;
 //- Return a word representation of an uint32
 word name(const uint32_t);
 
+
+#ifdef _WIN32
+Istream& operator>>(Istream&, unsigned long&);
+Ostream& operator<<(Ostream&, const unsigned long);
+Istream& operator>>(Istream&, unsigned short&);
+Ostream& operator<<(Ostream&, const unsigned short);
+#endif
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 uint32_t readUint32(Istream&);

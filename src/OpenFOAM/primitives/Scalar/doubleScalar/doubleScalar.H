@@ -121,11 +121,21 @@ inline Scalar func(const Scalar s) \
     return std::func(s);           \
 }
 
+#ifdef _WIN32
+#define cFunc(func)                \
+inline Scalar func(const Scalar s) \
+{                                  \
+    return ::_##func(s);              \
+}
+
+#else
 #define cFunc(func)                \
 inline Scalar func(const Scalar s) \
 {                                  \
     return ::func(s);              \
 }
+
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -154,12 +164,20 @@ inline Scalar atan2(const Scalar y, const Scalar x)
 
 inline Scalar jn(const int n, const Scalar s)
 {
+    #ifdef _WIN32
+    return ::_jn(n, s);
+#else
     return ::jn(n, s);
+#endif
 }
 
 inline Scalar yn(const int n, const Scalar s)
 {
+    #ifdef _WIN32
+    return ::_yn(n, s);
+#else
     return ::yn(n, s);
+#endif
 }
 
 #undef Scalar

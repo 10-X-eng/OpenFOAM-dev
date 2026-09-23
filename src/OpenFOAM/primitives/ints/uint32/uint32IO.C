@@ -93,3 +93,29 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const uint32_t i)
 
 
 // ************************************************************************* //
+
+#ifdef _WIN32
+Foam::Istream& Foam::operator>>(Istream& is, unsigned long& value)
+{
+    uint32_t temporary;
+    is >> temporary;
+    value = static_cast<unsigned long>(temporary);
+    return is;
+}
+Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned long value)
+{
+    return os << static_cast<uint32_t>(value);
+}
+Foam::Istream& Foam::operator>>(Istream& is, unsigned short& value)
+{
+    uint32_t temporary;
+    is >> temporary;
+    if (temporary > USHRT_MAX) { is.setBad(); return is; }
+    value = static_cast<unsigned short>(temporary);
+    return is;
+}
+Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned short value)
+{
+    return os << static_cast<uint32_t>(value);
+}
+#endif

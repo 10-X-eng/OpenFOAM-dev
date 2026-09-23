@@ -72,6 +72,20 @@ bool Foam::fileName::hasPath() const
 
 bool Foam::fileName::isAbsolute() const
 {
+#ifdef _WIN32
+    // Drive-qualified Windows paths. A drive-relative path such as C:foo
+    // deliberately remains relative; a bare drive letter is not a root.
+    if
+    (
+        size() >= 3
+     && std::isalpha(static_cast<unsigned char>(operator[](0)))
+     && operator[](1) == ':'
+     && operator[](2) == '/'
+    )
+    {
+        return true;
+    }
+#endif
     return !empty() && operator[](0) == '/';
 }
 

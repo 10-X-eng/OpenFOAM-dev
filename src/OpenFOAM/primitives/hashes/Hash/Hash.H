@@ -33,6 +33,8 @@ Description
 #ifndef Hash_H
 #define Hash_H
 
+#include <cstdint>
+
 #include "label.H"
 #include "uLabel.H"
 #include "Hasher.H"
@@ -201,7 +203,7 @@ public:
 
 
 //- Hash specialisation for hashing pointer addresses.
-//  Treat a pointer like a long.
+//  Hash the entire pointer, including on LLP64 Windows.
 //  This should work for both 32-bit and 64-bit pointers.
 template<>
 class Hash<void*>
@@ -213,12 +215,12 @@ public:
 
     unsigned operator()(const void* const& p, unsigned seed) const
     {
-        return Hash<long>()(long(p), seed);
+        return Hash<std::uintptr_t>()(reinterpret_cast<std::uintptr_t>(p), seed);
     }
 
     unsigned operator()(const void* const& p) const
     {
-        return Hash<long>()(long(p));
+        return Hash<std::uintptr_t>()(reinterpret_cast<std::uintptr_t>(p));
     }
 };
 

@@ -141,7 +141,7 @@ inline word name(const int64_t val)
 
 inline int64_t mag(const int64_t l)
 {
-    return ::labs(l);
+    return std::abs(l);
 }
 
 

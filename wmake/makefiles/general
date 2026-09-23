@@ -118,9 +118,28 @@ include $(GENERAL_RULES)/transform
 #------------------------------------------------------------------------------
 
 include $(FILES)
+ifeq ($(WM_ARCH),mingw64)
+    EXE := $(EXE).exe
+    SEXE := $(SEXE).exe
+    LIB_LIBS += $(if $(filter libOpenFOAM,$(notdir $(LIB))),,-lOpenFOAM)
+    LINK_DEPS = $(if $(filter libOpenFOAM,$(notdir $(LIB))),$(FOAM_LIBBIN)/libOSspecific.o,)
+    LINK_PRE_OBJECTS = $(LINK_DEPS)
+endif
 DEPENDENCIES=$(SOURCE:%=$(OBJECTS_DIR)/%.dep)
 BASENAMES=$(basename $(SOURCE))
 OBJECTS=$(BASENAMES:%=$(OBJECTS_DIR)/%.o)
+
+# Windows CreateProcess has a command-line length limit. Keep the potentially
+# large object list in a response file, using paths native tools can read.
+# MinGW runs .ctors in reverse link order. Reverse the input objects to retain
+# OpenFOAM's original global-initialisation order (notably dimensions/units).
+ifeq ($(WM_ARCH),mingw64)
+    define LINK_OBJECTS
+$(file >$(OBJECTS_DIR)/link.rsp,$(shell cygpath -m $(OBJECTS) | tac))@$(shell cygpath -m $(OBJECTS_DIR)/link.rsp)
+    endef
+else
+    LINK_OBJECTS = $(OBJECTS)
+endif
 
 
 #------------------------------------------------------------------------------
@@ -148,20 +167,20 @@ all: $(EXE)
 silent:
 	@:
 
-$(EXE): $(OBJECTS)
+$(EXE): $(OBJECTS) $(WM_DIR)/makefiles/general
 	@$(WM_SCRIPTS)/makeTargetDir $(EXE)
 	$(call QUIET_MESSAGE,ld,$(EXE))
-	$E $(LINKEXE) $(OBJECTS) -L$(LIB_PLATFORMS) \
+	$E $(LINKEXE) $(LINK_OBJECTS) -L$(LIB_PLATFORMS) \
 	    $(EXE_LIBS) $(PROJECT_LIBS) $(SYS_LIBS) \
 	    $(LINK_LIBS) $(GLIBS) -o $(EXE)
 
 .PHONY: exe
 exe: $(SEXE) | silent
 
-$(SEXE): $(OBJECTS)
+$(SEXE): $(OBJECTS) $(WM_DIR)/makefiles/general
 	@$(WM_SCRIPTS)/makeTargetDir $(SEXE)
 	$(call QUIET_MESSAGE,ld,$(SEXE))
-	$E $(LINKEXE) $(OBJECTS) $(EXE_LIBS) \
+	$E $(LINKEXE) $(LINK_OBJECTS) $(EXE_LIBS) \
 	    $(SYS_LIBS) $(LINK_LIBS) $(GLIBS) -o $(SEXE)
 
 
@@ -175,11 +194,11 @@ objects: $(OBJECTS) | silent
 .PHONY: libso
 libso: $(LIB).$(SO) | silent
 
-$(LIB).$(SO): $(OBJECTS)
+$(LIB).$(SO): $(OBJECTS) $(LINK_DEPS) $(WM_DIR)/makefiles/general
 	@$(WM_SCRIPTS)/makeTargetDir $(LIB)
 	$(call QUIET_MESSAGE,ld,$(LIB).$(SO))
-	$E $(LINKLIBSO) $(OBJECTS) -L$(LIB_PLATFORMS) \
-	    $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB).$(SO)
+	$E $(LINKLIBSO) $(LINK_PRE_OBJECTS) $(LINK_OBJECTS) -L$(LIB_PLATFORMS) \
+	    $(filter-out $(LINK_PRE_OBJECTS),$(LIB_LIBS)) $(GLIB_LIBS) -o $(LIB).$(SO)
 
 .PHONY: lib
 lib: $(LIB).a | silent

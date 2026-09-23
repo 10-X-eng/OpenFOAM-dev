@@ -108,3 +108,17 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const long i)
 
 
 // ************************************************************************* //
+
+#ifdef _WIN32
+Foam::Istream& Foam::operator>>(Istream& is, long& value)
+{
+    int32_t temporary;
+    is >> temporary;
+    value = static_cast<long>(temporary);
+    return is;
+}
+Foam::Ostream& Foam::operator<<(Ostream& os, const long value)
+{
+    return os << static_cast<int32_t>(value);
+}
+#endif
