@@ -22,6 +22,9 @@ build:
       $destination = Join-Path $env:PREFIX 'Library/OpenFOAM'
       New-Item -ItemType Directory -Path $destination -Force | Out-Null
       Copy-Item -Path (Join-Path $env:SRC_DIR '*') -Destination $destination -Recurse
+      $commands = Join-Path $env:PREFIX 'Library/bin'
+      New-Item -ItemType Directory -Path $commands -Force | Out-Null
+      Copy-Item -LiteralPath (Join-Path $destination 'OpenFOAM.exe') -Destination $commands
       # Conda manages MPI; the standalone installer bundles the same ABI locally.
       foreach ($file in @('msmpi.dll', 'mpiexec.exe', 'smpd.exe')) {
           Remove-Item -LiteralPath (Join-Path $destination "bin/$file")
@@ -33,10 +36,10 @@ requirements:
 
 tests:
   - script:
-      - '"%PREFIX%\Library\OpenFOAM\OpenFOAM.exe" Test-Windows'
-      - '"%PREFIX%\Library\OpenFOAM\OpenFOAM.exe" Test-Windows --libraries'
-      - '"%PREFIX%\Library\OpenFOAM\OpenFOAM.exe" mpiexec -n 2 Test-Windows --mpi'
-      - '"%PREFIX%\Library\OpenFOAM\OpenFOAM.exe" foamDictionary -help'
+      - 'OpenFOAM.exe Test-Windows'
+      - 'OpenFOAM.exe Test-Windows --libraries'
+      - 'OpenFOAM.exe mpiexec -n 2 Test-Windows --mpi'
+      - 'OpenFOAM.exe foamDictionary -help'
 
 about:
   homepage: https://openfoam.org

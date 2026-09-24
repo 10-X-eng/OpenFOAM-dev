@@ -46,7 +46,15 @@ int wmain(int argc, wchar_t** argv)
         std::vector<wchar_t> module(32768);
         DWORD n = GetModuleFileNameW(nullptr, module.data(), DWORD(module.size()));
         if (!n || n == module.size()) throw std::runtime_error("Cannot locate installation");
-        const auto root = std::filesystem::path(module.data()).parent_path();
+        auto root = std::filesystem::path(module.data()).parent_path();
+        // Conda exposes this same launcher in Library/bin and keeps the
+        // self-contained runtime next to it in Library/OpenFOAM.
+        const auto condaRoot = root.parent_path() / L"OpenFOAM";
+        if (!std::filesystem::exists(root / L"manifest.json")
+            && std::filesystem::exists(condaRoot / L"manifest.json"))
+        {
+            root = condaRoot;
+        }
         auto set = [](const wchar_t* key, const std::wstring& value)
         {
             if (!SetEnvironmentVariableW(key, value.c_str()))
