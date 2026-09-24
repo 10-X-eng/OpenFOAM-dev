@@ -107,6 +107,11 @@ inline Foam::fileName::fileName(const char* str)
 
 inline bool Foam::fileName::valid(char c)
 {
+#ifdef _WIN32
+    // Windows user, installation and case directories commonly contain spaces.
+    // Keep other whitespace and dictionary delimiters subject to normal checks.
+    if (c == ' ') return true;
+#endif
     return
     (
         !isspace(c)
