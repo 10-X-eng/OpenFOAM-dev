@@ -1,3 +1,4 @@
 Test-Windows.C
+Test-WindowsImports.C
 
 EXE = $(FOAM_APPBIN)/Test-Windows

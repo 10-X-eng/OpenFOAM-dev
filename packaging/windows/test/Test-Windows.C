@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include "fileName.H"
 #include "Hash.H"
 #include "int64.H"
@@ -10,6 +8,8 @@
 #include "PstreamReduceOps.H"
 #include <iostream>
 #include <cstdint>
+
+bool windowsLibrariesRetained();
 
 int main(int argc, char** argv)
 {
@@ -47,8 +47,7 @@ int main(int argc, char** argv)
     if (Hash<void*>()(low) == Hash<void*>()(high)) return 6;
     if (std::abs(Foam::j0(scalar(0)) - 1) > 1e-12) return 7;
     if (std::abs(Foam::jn(1, scalar(1)) - 0.4400505857449335) > 1e-12) return 8;
-    if (!GetModuleHandleW(L"libscotchDecomp.dll")
-        || !GetModuleHandleW(L"libgenericFvFields.dll")) return 12;
+    if (!windowsLibrariesRetained()) return 12;
     std::cout << "PASS: Windows paths, LLP64 integers/pointers, and Bessel functions\n";
     std::cout << "PASS: registration-only DLL imports retained\n";
     return 0;
