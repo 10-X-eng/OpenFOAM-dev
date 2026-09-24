@@ -13,6 +13,15 @@ $oldLocation = Get-Location
 $variables = @('WM_PROJECT', 'WM_PROJECT_VERSION', 'WM_PROJECT_DIR', 'FOAM_ETC', 'FOAM_LIBBIN', 'MPI_BUFFER_SIZE')
 $saved = @{}
 foreach ($name in $variables) { $saved[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
+function Set-CavityPressureReference([string]$caseDirectory) {
+    # pRefCell is local to rank zero and can select a different physical cell
+    # after Scotch decomposition. Use the same point for both numerical runs.
+    $solution = Join-Path $caseDirectory 'system/fvSolution'
+    $text = Get-Content -LiteralPath $solution -Raw
+    if ($text -notmatch 'pRefCell\s+0\s*;') { throw 'Cavity pressure reference was not found.' }
+    ($text -replace 'pRefCell\s+0\s*;', 'pRefPoint (0.0025 0.0025 0.005);') |
+        Set-Content -LiteralPath $solution -Encoding ascii
+}
 try {
     # Only Windows and the packaged runtime may satisfy DLL dependencies.
     $env:PATH = "$bin;$env:WINDIR\System32;$env:WINDIR"
@@ -32,6 +41,7 @@ try {
     if (Test-Path -LiteralPath $case) { throw "Test case already exists: $case" }
     New-Item -ItemType Directory -Path (Split-Path $case) -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $package 'tutorials/legacy/incompressible/icoFoam/cavity/cavity') -Destination $case -Recurse
+    Set-CavityPressureReference $case
     Set-Location -LiteralPath $case
     foreach ($app in @('blockMesh', 'checkMesh', 'icoFoam')) {
         & (Join-Path $bin "$app.exe") 2>&1 | Out-File "log.$app" -Encoding utf8
@@ -64,6 +74,7 @@ try {
     $parallelCase = Join-Path $WorkDirectory 'smoke-parallel'
     if (Test-Path -LiteralPath $parallelCase) { throw "Test case already exists: $parallelCase" }
     Copy-Item -LiteralPath (Join-Path $package 'tutorials/legacy/incompressible/icoFoam/cavity/cavity') -Destination $parallelCase -Recurse
+    Set-CavityPressureReference $parallelCase
     Set-Location -LiteralPath $parallelCase
     @'
 FoamFile { format ascii; class dictionary; object decomposeParDict; }
