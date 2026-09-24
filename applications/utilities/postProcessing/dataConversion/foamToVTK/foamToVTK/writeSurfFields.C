@@ -42,7 +42,7 @@ void Foam::writeSurfFields
 {
     const fvMesh& mesh = vMesh.mesh();
 
-    std::ofstream str(fileName.c_str());
+    std::ofstream str(fileName.c_str(), std::ios::out | std::ios::binary);
 
     vtkWriteOps::writeHeader
     (

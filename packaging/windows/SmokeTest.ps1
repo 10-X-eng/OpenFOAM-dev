@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory)][string]$PackageDirectory,
-    [string]$WorkDirectory
+    [string]$WorkDirectory,
+    [string]$VtkPython
 )
 $ErrorActionPreference = 'Stop'
 $package = (Resolve-Path -LiteralPath $PackageDirectory).Path
@@ -59,7 +60,17 @@ try {
     if ($LASTEXITCODE -or -not (Get-ChildItem -LiteralPath (Join-Path $case 'VTK') -Filter '*.vtk')) {
         throw 'Native launcher/VTK result export failed.'
     }
-    Write-Output 'PASS: native launcher exported final CFD fields to VTK.'
+    if ($VtkPython) {
+        & $VtkPython (Join-Path $PSScriptRoot 'Test-VTK.py') $case --format BINARY > log.vtk-binary 2>&1
+        if ($LASTEXITCODE) { throw 'VTK could not read the binary export. See log.vtk-binary.' }
+        & (Join-Path $package 'OpenFOAM.exe') foamToVTK -latestTime -ascii > log.foamToVTK-ascii 2>&1
+        if ($LASTEXITCODE) { throw 'ASCII VTK export failed.' }
+        & $VtkPython (Join-Path $PSScriptRoot 'Test-VTK.py') $case --format ASCII > log.vtk-ascii 2>&1
+        if ($LASTEXITCODE) { throw 'VTK could not read the ASCII export. See log.vtk-ascii.' }
+        Write-Output 'PASS: VTK read binary and ASCII meshes and fields; pressure/velocity match solver output.'
+    } else {
+        Write-Output 'VTK files generated; read-back validation requires -VtkPython.'
+    }
 
     # Exercise the current modular solver, including runtime loading of its DLL.
     $moduleCase = Join-Path $WorkDirectory 'smoke-module'

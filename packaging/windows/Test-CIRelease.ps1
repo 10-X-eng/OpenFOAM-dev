@@ -13,15 +13,16 @@ $revision = (& git -C $source rev-parse --short=12 HEAD).Trim()
 if ($LASTEXITCODE) { throw 'Cannot read source revision.' }
 $package = Join-Path $OutputDirectory "OpenFOAM-dev-windows-x64-$revision"
 $probes = Join-Path $WorkDirectory 'test tools'
+$vtkPython = (Get-Command python -CommandType Application).Source
 & "$PSScriptRoot\Build-TestTools.ps1" -OutputDirectory $probes -MsysRoot $MsysRoot
-& "$PSScriptRoot\SmokeTest.ps1" -PackageDirectory $package -WorkDirectory "$WorkDirectory\portable cases" *> "$WorkDirectory\portable.log"
+& "$PSScriptRoot\SmokeTest.ps1" -PackageDirectory $package -WorkDirectory "$WorkDirectory\portable cases" -VtkPython $vtkPython *> "$WorkDirectory\portable.log"
 & "$PSScriptRoot\Test-Applications.ps1" -PackageDirectory $package *> "$WorkDirectory\applications.log"
 & "$PSScriptRoot\Test-AllLibraries.ps1" -PackageDirectory $package -ProbePath "$probes\load-library.exe" *> "$WorkDirectory\libraries.log"
 & "$PSScriptRoot\Test-Launcher.ps1" -PackageDirectory $package -ProbePath "$probes\launcher-arguments.exe" -WorkDirectory "$probes\caller directory" *> "$WorkDirectory\launcher.log"
 & python -c 'import sys,zipfile; z=zipfile.ZipFile(sys.argv[1]); bad=z.testzip(); assert bad is None,bad; print("PASS: ZIP CRC",len(z.infolist()),"entries")' "$package.zip" *> "$WorkDirectory\zip.log"
 if ($LASTEXITCODE) { throw 'ZIP CRC validation failed.' }
 & "$PSScriptRoot\MakeInstaller.ps1" -PackageDirectory $package -MsysRoot $MsysRoot *> "$WorkDirectory\installer-build.log"
-& "$PSScriptRoot\Test-Installer.ps1" -Installer "$package-Setup.exe" -InstallDirectory "$WorkDirectory\installed OpenFOAM" -ProbeDirectory $probes *> "$WorkDirectory\installer.log"
+& "$PSScriptRoot\Test-Installer.ps1" -Installer "$package-Setup.exe" -InstallDirectory "$WorkDirectory\installed OpenFOAM" -ProbeDirectory $probes -VtkPython $vtkPython *> "$WorkDirectory\installer.log"
 Write-Output 'PASS: standalone runtime and installer lifecycle.'
 
 $rattler = Join-Path $WorkDirectory 'rattler-build.exe'

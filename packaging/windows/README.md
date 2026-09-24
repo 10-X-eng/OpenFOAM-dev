@@ -107,6 +107,13 @@ coexisting Lagrangian DLLs, a two-rank MPI reduction, a complete cavity run,
 `foamRun` module loading, Scotch decomposition and a parallel CFD run followed by
 field reconstruction.
 
+Pass `-VtkPython` with the full path to ParaView's `pvpython.exe`, or a Python
+installation with `vtk==9.5.2`, to validate visualization exports. This reads both
+binary and ASCII files through VTK, checks mesh topology and boundary files, and
+compares exported pressure and velocity against the solver fields. CI requires
+this check for both the portable and installed runtime. A successful export
+command alone is not considered visualization validation.
+
 `Test-Applications.ps1` requires PowerShell 7 and checks startup of every packaged
 application. In the MSYS2 build shell, `bash packaging/windows/Test-DynamicCode.sh`
 checks native `#codeStream` compilation, DLL loading and cached reuse. This test

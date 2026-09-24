@@ -48,7 +48,7 @@ jobs:
         id: msys
         with:
           msystem: UCRT64
-          location: C:\
+          location: C:\of-msys
           update: true
           install: >-
             git gcc make flex bison util-linux
@@ -61,6 +61,14 @@ jobs:
             mingw-w64-ucrt-x86_64-scotch
             mingw-w64-ucrt-x86_64-boost
             mingw-w64-ucrt-x86_64-nsis
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Install VTK result reader
+        shell: pwsh
+        run: |
+          python -m pip install vtk==9.5.2
+          if ($LASTEXITCODE) { throw 'Cannot install VTK validation dependency.' }
       - name: Compile full native Windows source
         shell: msys2 {0}
         run: |

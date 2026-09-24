@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory)][string]$Installer,
     [Parameter(Mandatory)][string]$InstallDirectory,
-    [Parameter(Mandatory)][string]$ProbeDirectory
+    [Parameter(Mandatory)][string]$ProbeDirectory,
+    [Parameter(Mandatory)][string]$VtkPython
 )
 $ErrorActionPreference = 'Stop'
 if (Test-Path -LiteralPath $InstallDirectory) { throw 'Installer test destination must be new.' }
@@ -17,7 +18,7 @@ if (-not (Test-Path -LiteralPath (Join-Path $InstallDirectory 'OpenFOAM.exe'))) 
 Write-Output 'PASS: per-user silent installer completed with asInvoker manifest'
 $installedFiles = @(Get-ChildItem -LiteralPath $InstallDirectory -File -Recurse |
     Where-Object { $_.Name -ne 'Uninstall.exe' } | ForEach-Object FullName)
-& (Join-Path $PSScriptRoot 'SmokeTest.ps1') -PackageDirectory $InstallDirectory -WorkDirectory "$InstallDirectory-validation"
+& (Join-Path $PSScriptRoot 'SmokeTest.ps1') -PackageDirectory $InstallDirectory -WorkDirectory "$InstallDirectory-validation" -VtkPython $VtkPython
 & (Join-Path $PSScriptRoot 'Test-Applications.ps1') -PackageDirectory $InstallDirectory
 & (Join-Path $PSScriptRoot 'Test-AllLibraries.ps1') -PackageDirectory $InstallDirectory -ProbePath (Join-Path $ProbeDirectory 'load-library.exe')
 & (Join-Path $PSScriptRoot 'Test-Launcher.ps1') -PackageDirectory $InstallDirectory -ProbePath (Join-Path $ProbeDirectory 'launcher-arguments.exe') -WorkDirectory (Join-Path $ProbeDirectory 'caller directory')

@@ -39,7 +39,7 @@ void Foam::writeFaceSet
 {
     const faceList& faces = vMesh.mesh().faces();
 
-    std::ofstream ostr(fileName.c_str());
+    std::ofstream ostr(fileName.c_str(), std::ios::out | std::ios::binary);
 
     vtkWriteOps::writeHeader
     (

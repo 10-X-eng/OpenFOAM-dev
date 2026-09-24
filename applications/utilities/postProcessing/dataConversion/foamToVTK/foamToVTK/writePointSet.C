@@ -42,7 +42,7 @@ void writePointSet
     const fileName& fileName
 )
 {
-    std::ofstream ostr(fileName.c_str());
+    std::ofstream ostr(fileName.c_str(), std::ios::out | std::ios::binary);
 
     vtkWriteOps::writeHeader
     (

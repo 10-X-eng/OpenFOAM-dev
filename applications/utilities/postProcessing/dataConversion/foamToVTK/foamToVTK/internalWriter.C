@@ -38,7 +38,7 @@ Foam::internalWriter::internalWriter
     vMesh_(vMesh),
     binary_(binary),
     fName_(fName),
-    os_(fName.c_str())
+    os_(fName.c_str(), std::ios::out | std::ios::binary)
 {
     const fvMesh& mesh = vMesh_.mesh();
     const vtkTopo& topo = vMesh_.topo();

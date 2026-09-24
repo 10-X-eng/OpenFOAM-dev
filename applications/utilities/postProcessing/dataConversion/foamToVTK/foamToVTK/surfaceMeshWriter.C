@@ -39,7 +39,7 @@ Foam::surfaceMeshWriter::surfaceMeshWriter
     binary_(binary),
     pp_(pp),
     fName_(fName),
-    os_(fName.c_str())
+    os_(fName.c_str(), std::ios::out | std::ios::binary)
 {
     // Write header
     vtkWriteOps::writeHeader(os_, binary_, name);

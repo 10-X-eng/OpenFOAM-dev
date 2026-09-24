@@ -42,7 +42,7 @@ Foam::patchWriter::patchWriter
     nearCellValue_(nearCellValue),
     fName_(fName),
     patchIndices_(patchIDs),
-    os_(fName.c_str())
+    os_(fName.c_str(), std::ios::out | std::ios::binary)
 {
     const fvMesh& mesh = vMesh_.mesh();
     const polyBoundaryMesh& patches = mesh.poly().boundary();
