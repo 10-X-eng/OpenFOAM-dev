@@ -55,6 +55,11 @@ try {
         if (Select-String -LiteralPath $path -Pattern '\b(nan|inf)\b') { throw "Non-finite values in $path" }
     }
     Write-Output "PASS: Windows-only runtime, mesh validation, and 100 cavity solver steps. Logs: $case"
+    & (Join-Path $package 'OpenFOAM.exe') foamToVTK -latestTime > log.foamToVTK 2>&1
+    if ($LASTEXITCODE -or -not (Get-ChildItem -LiteralPath (Join-Path $case 'VTK') -Filter '*.vtk')) {
+        throw 'Native launcher/VTK result export failed.'
+    }
+    Write-Output 'PASS: native launcher exported final CFD fields to VTK.'
 
     # Exercise the current modular solver, including runtime loading of its DLL.
     $moduleCase = Join-Path $WorkDirectory 'smoke-module'

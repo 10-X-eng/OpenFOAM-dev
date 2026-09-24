@@ -1,19 +1,27 @@
-name: Native Windows full package
+name: Native Windows installer
 
 on:
+  push:
+    branches: [windows-native]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: windows-native-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   windows:
+    name: Build and test native Windows packages
     runs-on: windows-2022
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           sparse-checkout: packaging/windows
+          persist-credentials: false
       - name: Prepare case-sensitive source checkout
         shell: pwsh
         env:
@@ -25,13 +33,17 @@ jobs:
           fsutil.exe file setCaseSensitiveInfo C:\of-build enable
           if ($LASTEXITCODE) { throw 'Cannot enable case-sensitive source directory.' }
           git init C:\of-build\OpenFOAM-dev
+          if ($LASTEXITCODE) { throw 'Source initialization failed.' }
           git -C C:\of-build\OpenFOAM-dev config core.longpaths true
           git -C C:\of-build\OpenFOAM-dev config core.autocrlf false
           git -C C:\of-build\OpenFOAM-dev config core.ignorecase false
+          git -C C:\of-build\OpenFOAM-dev config core.symlinks false
           git -C C:\of-build\OpenFOAM-dev fetch --depth 1 $env:SOURCE_URL $env:SOURCE_REVISION
           if ($LASTEXITCODE) { throw 'Source fetch failed.' }
           git -C C:\of-build\OpenFOAM-dev checkout --detach FETCH_HEAD
           if ($LASTEXITCODE) { throw 'Source checkout failed.' }
+          New-Item -ItemType Directory C:\of-build\validation | Out-Null
+          Get-PSDrive C | Format-List
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884
         id: msys
         with:
@@ -49,33 +61,43 @@ jobs:
             mingw-w64-ucrt-x86_64-scotch
             mingw-w64-ucrt-x86_64-boost
             mingw-w64-ucrt-x86_64-nsis
-      - name: Compile Windows executables
+      - name: Compile full native Windows source
         shell: msys2 {0}
         run: |
-          set -o pipefail
+          set -eo pipefail
           cd /c/of-build/OpenFOAM-dev
-          JOBS=4 bash packaging/windows/build.sh 2>&1 | tee /c/of-build/build.log
-          bash packaging/windows/Test-DynamicCode.sh
-      - name: Package and exercise the Windows-only runtime
+          pacman -Q > /c/of-build/validation/toolchain.txt
+          JOBS=4 bash packaging/windows/build.sh 2>&1 | tee /c/of-build/validation/build.log
+          bash packaging/windows/Test-DynamicCode.sh /c/of-build/validation/code-stream 2>&1 | tee /c/of-build/validation/code-stream.log
+      - name: Package, test runtime, and verify installer lifecycle
         shell: pwsh
         env:
           MSYS_ROOT: ${{ steps.msys.outputs.msys2-location }}
         run: |
-          $ErrorActionPreference = 'Stop'
-          $output = Join-Path $env:GITHUB_WORKSPACE 'artifacts'
-          & C:\of-build\OpenFOAM-dev\packaging\windows\Package.ps1 -OutputDirectory $output -MsysRoot $env:MSYS_ROOT
-          $package = Get-ChildItem -LiteralPath $output -Directory | Select-Object -First 1
-          & C:\of-build\OpenFOAM-dev\packaging\windows\SmokeTest.ps1 -PackageDirectory $package.FullName -WorkDirectory (Join-Path $output 'validation')
-          & C:\of-build\OpenFOAM-dev\packaging\windows\Test-Applications.ps1 -PackageDirectory $package.FullName
-          & C:\of-build\OpenFOAM-dev\packaging\windows\MakeInstaller.ps1 -PackageDirectory $package.FullName -MsysRoot $env:MSYS_ROOT
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
+          & C:\of-build\OpenFOAM-dev\packaging\windows\Test-CIRelease.ps1 -OutputDirectory (Join-Path $env:GITHUB_WORKSPACE 'artifacts') -WorkDirectory C:\of-build\validation -MsysRoot $env:MSYS_ROOT
+      - name: Upload validated packages
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: windows-native-build
+          name: windows-native-packages
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
           path: |
             artifacts/*.zip
             artifacts/*.tar.gz
             artifacts/*-Setup.exe
-            artifacts/validation/**/log.*
-            C:/of-build/build.log
+            artifacts/*.conda
+            artifacts/SHA256SUMS.txt
+            artifacts/manifest.json
+            artifacts/build-coverage.json
+      - name: Upload build and test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: windows-native-validation
+          retention-days: 14
           if-no-files-found: warn
+          path: |
+            C:/of-build/validation/**/*.log
+            C:/of-build/validation/**/log.*
+            C:/of-build/validation/toolchain.txt

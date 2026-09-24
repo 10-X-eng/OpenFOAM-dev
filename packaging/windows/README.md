@@ -120,6 +120,26 @@ Conda-compatible version, and `OPENFOAM_REVISION` to the Git revision, then run:
 rattler-build build -r packaging/windows/rattler/recipe.yaml
 ```
 
+## GitHub Actions
+
+The `Native Windows installer` workflow builds pushes to `windows-native` on a
+fresh Windows 2022 runner. It can also be dispatched manually once registered
+on the repository's default branch. No binaries from a developer machine are
+used. The compiler and dependency versions are recorded in the validation logs.
+
+Successful runs upload `windows-native-packages`: the installer EXE, portable
+ZIP, matching source archive, Rattler/Conda package, manifests and SHA-256
+checksums. The packages are uploaded only after the runtime and actual installer
+pass the CFD/MPI, application, DLL, launcher and uninstall checks. Installer and
+case paths deliberately contain spaces. Logs are uploaded separately as
+`windows-native-validation`, including when a build fails. Artifacts are retained
+for 14 days; the workflow does not publish a GitHub Release.
+
+`Test-CIRelease.ps1` runs the same packaging gates on a disposable Windows host.
+It refuses to replace an existing registered OpenFOAM installation. The test
+helpers are built with `Build-TestTools.ps1`; their child processes run with the
+development toolchain removed from PATH.
+
 ## Provenance
 
 The Windows OS implementation was adapted from
