@@ -45,7 +45,8 @@ inventory and exclusions are recorded in `build-coverage.json`.
 
 Upstream's disabled Sloan renumberer, optional ParMGridGen agglomerator (whose
 source is no longer in ThirdParty-dev), ParaView SDK reader plugins, and the
-TecIO-dependent Tecplot exporter are outside the standard build. ParaView is a
+TecIO-dependent Tecplot exporter and libccmio-dependent CCM importer are outside
+the standard build. ParaView is a
 separate application; `foamToVTK`
 provides interoperable visualization output. Runtime compilation of user code
 requires a configured native build toolchain; the runtime package is not a

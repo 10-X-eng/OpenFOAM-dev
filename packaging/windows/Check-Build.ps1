@@ -20,6 +20,7 @@ foreach ($file in $files) {
     elseif ($file -match '^src/fvAgglomerationMethods/MGridGenGamgAgglomeration/') { $reason = 'Optional ParMGridGen is no longer supplied by upstream ThirdParty-dev.' }
     elseif ($file -match '/PVReaders/') { $reason = 'Optional ParaView SDK plugins; foamToVTK supplies interoperable output.' }
     elseif ($file -match '/foamToTecplot360/') { $reason = 'Optional TecIO SDK is not supplied by upstream ThirdParty-dev.' }
+    elseif ($file -match '/Optional/ccm26ToFoam/') { $reason = 'Optional libccmio SDK and its build script are not supplied by upstream ThirdParty-dev.' }
     if ($reason) {
         $excluded += @{ source = $file; reason = $reason }
         continue
