@@ -146,7 +146,9 @@ ifeq ($(WM_ARCH),mingw64)
     # the consumer does not call one of their model implementations directly.
     windowsLibraryPaths = $(FOAM_LIBBIN) $(FOAM_LIBBIN)/$(FOAM_MPI) $(FOAM_USER_LIBBIN) $(FOAM_SITE_LIBBIN)
     windowsAnchorPrefix = -Wl,--undefined,openfoamAnchor_
-    windowsAnchors = $(foreach library,$(patsubst -l%,lib%,$(filter -l%,$1)),$(if $(wildcard $(addsuffix /$(library).dll.a,$(windowsLibraryPaths))),$(windowsAnchorPrefix)$(library)))
+    # Plugin filenames such as libuserd-foam need a valid C identifier.
+    windowsLibraryId = $(subst .,_,$(subst -,_,$1))
+    windowsAnchors = $(foreach library,$(patsubst -l%,lib%,$(filter -l%,$1)),$(if $(wildcard $(addsuffix /$(library).dll.a,$(windowsLibraryPaths))),$(windowsAnchorPrefix)$(call windowsLibraryId,$(library))))
     LIB_LIBS := $(LIB_LIBS) $(call windowsAnchors,$(LIB_LIBS))
     EXE_LIBS := $(EXE_LIBS) $(call windowsAnchors,$(EXE_LIBS) $(PROJECT_LIBS))
 endif
@@ -231,7 +233,7 @@ lib: $(LIB).a | silent
 ifeq ($(WM_ARCH),mingw64)
 ifneq ($(LIB),libNULL)
 $(WINDOWS_LIBRARY_ANCHOR): $(WM_DIR)/src/windowsLibraryAnchor.cpp
-	$(CC) -DFOAM_WINDOWS_LIBRARY=$(notdir $(LIB)) -c $< -o $@
+	$(CC) -DFOAM_WINDOWS_LIBRARY=$(call windowsLibraryId,$(notdir $(LIB))) -c $< -o $@
 endif
 endif
 
