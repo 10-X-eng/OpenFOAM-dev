@@ -2,6 +2,7 @@
 set -eo pipefail
 source "$(dirname "$0")/environment.sh"
 cd "$WM_PROJECT_DIR"
+source_revision=$(git rev-parse HEAD)
 mkdir -p "$FOAM_APPBIN" "$FOAM_LIBBIN"
 rm -f "$FOAM_APPBIN/../.full-build-revision"
 # Remove only the superseded native filenames. The checkout and platforms
@@ -35,4 +36,8 @@ g++ -std=c++17 -O2 -municode -static -static-libgcc -static-libstdc++ \
     packaging/windows/launcher.cpp -o "$FOAM_APPBIN/../OpenFOAM.exe" \
     "$WM_PROJECT_DIR/platforms/windows-include/application.o" \
     -lshell32 -lole32 -luuid
-git rev-parse HEAD > "$FOAM_APPBIN/../.full-build-revision"
+if [ "$(git rev-parse HEAD)" != "$source_revision" ]; then
+    echo "Source revision changed during the build; rebuild before packaging." >&2
+    exit 1
+fi
+printf '%s\n' "$source_revision" > "$FOAM_APPBIN/../.full-build-revision"

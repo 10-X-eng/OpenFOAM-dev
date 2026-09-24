@@ -1,2 +1,2 @@
 EXE_INC =
-EXE_LIBS =
+EXE_LIBS = -lscotchDecomp -lgenericFvFields

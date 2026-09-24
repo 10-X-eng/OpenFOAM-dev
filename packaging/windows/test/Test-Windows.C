@@ -8,6 +8,7 @@
 #include "PstreamReduceOps.H"
 #include <iostream>
 #include <cstdint>
+#include <windows.h>
 
 int main(int argc, char** argv)
 {
@@ -45,6 +46,9 @@ int main(int argc, char** argv)
     if (Hash<void*>()(low) == Hash<void*>()(high)) return 6;
     if (std::abs(Foam::j0(scalar(0)) - 1) > 1e-12) return 7;
     if (std::abs(Foam::jn(1, scalar(1)) - 0.4400505857449335) > 1e-12) return 8;
+    if (!GetModuleHandleW(L"libscotchDecomp.dll")
+        || !GetModuleHandleW(L"libgenericFvFields.dll")) return 12;
     std::cout << "PASS: Windows paths, LLP64 integers/pointers, and Bessel functions\n";
+    std::cout << "PASS: registration-only DLL imports retained\n";
     return 0;
 }

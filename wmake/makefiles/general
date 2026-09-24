@@ -135,8 +135,20 @@ ifeq ($(WM_ARCH),mingw64)
     SEXE := $(SEXE).exe
     LIB_LIBS += -L$(FOAM_LIBBIN) $(if $(filter libOpenFOAM,$(notdir $(LIB))),,-lOpenFOAM)
     LINK_DEPS = $(if $(filter libOpenFOAM,$(notdir $(LIB))),$(FOAM_LIBBIN)/libOSspecific.o,)
+    ifneq ($(LIB),libNULL)
+        WINDOWS_LIBRARY_ANCHOR = $(OBJECTS_DIR)/windowsLibraryAnchor.o
+        LINK_DEPS += $(WINDOWS_LIBRARY_ANCHOR)
+    endif
     LINK_PRE_OBJECTS = $(LINK_DEPS)
     EXE_LINK_DEPS = $(WM_PROJECT_DIR)/platforms/windows-include/application.o
+
+    # Match ELF --no-as-needed: registration-only DLLs must be loaded even when
+    # the consumer does not call one of their model implementations directly.
+    windowsLibraryPaths = $(FOAM_LIBBIN) $(FOAM_LIBBIN)/$(FOAM_MPI) $(FOAM_USER_LIBBIN) $(FOAM_SITE_LIBBIN)
+    windowsAnchorPrefix = -Wl,--undefined,openfoamAnchor_
+    windowsAnchors = $(foreach library,$(patsubst -l%,lib%,$(filter -l%,$1)),$(if $(wildcard $(addsuffix /$(library).dll.a,$(windowsLibraryPaths))),$(windowsAnchorPrefix)$(library)))
+    LIB_LIBS := $(LIB_LIBS) $(call windowsAnchors,$(LIB_LIBS))
+    EXE_LIBS := $(EXE_LIBS) $(call windowsAnchors,$(EXE_LIBS) $(PROJECT_LIBS))
 endif
 DEPENDENCIES=$(SOURCE:%=$(OBJECTS_DIR)/%.dep)
 BASENAMES=$(basename $(SOURCE))
@@ -215,6 +227,13 @@ $(LIB).$(SO): $(OBJECTS) $(LINK_DEPS) $(WM_DIR)/makefiles/general
 
 .PHONY: lib
 lib: $(LIB).a | silent
+
+ifeq ($(WM_ARCH),mingw64)
+ifneq ($(LIB),libNULL)
+$(WINDOWS_LIBRARY_ANCHOR): $(WM_DIR)/src/windowsLibraryAnchor.cpp
+	$(CC) -DFOAM_WINDOWS_LIBRARY=$(notdir $(LIB)) -c $< -o $@
+endif
+endif
 
 $(LIB).a: $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(LIB)
