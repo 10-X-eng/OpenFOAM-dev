@@ -70,8 +70,8 @@ int wmain(int argc, wchar_t** argv)
         if (env(L"MPI_BUFFER_SIZE").empty()) set(L"MPI_BUFFER_SIZE", L"20000000");
         std::wstring path = (root / L"bin").wstring() + L";";
         auto mpi = env(L"MSMPI_BIN");
-        if (mpi.empty()) mpi = env(L"ProgramFiles") + L"\\Microsoft MPI\\Bin";
-        set(L"PATH", path + mpi + L";" + env(L"PATH"));
+        if (!mpi.empty()) path += mpi + L";";
+        set(L"PATH", path + env(L"PATH"));
         auto run = env(L"FOAM_RUN");
         if (run.empty())
         {

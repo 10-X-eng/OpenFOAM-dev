@@ -14,6 +14,7 @@ foreach ($app in $manifest.applications) {
     $start.RedirectStandardOutput = $true
     $start.RedirectStandardError = $true
     $start.EnvironmentVariables['PATH'] = "$env:WINDIR\System32;$env:WINDIR"
+    $start.EnvironmentVariables['MSMPI_BIN'] = ''
     $process = [Diagnostics.Process]::Start($start)
     $stdout = $process.StandardOutput.ReadToEndAsync()
     $stderr = $process.StandardError.ReadToEndAsync()
