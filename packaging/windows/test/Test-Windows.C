@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include "fileName.H"
 #include "Hash.H"
 #include "int64.H"
@@ -8,7 +10,6 @@
 #include "PstreamReduceOps.H"
 #include <iostream>
 #include <cstdint>
-#include <windows.h>
 
 int main(int argc, char** argv)
 {
