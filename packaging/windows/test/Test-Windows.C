@@ -41,6 +41,9 @@ int main(int argc, char** argv)
     if (fileName("C:case").isAbsolute()) return 2;
     if (fileName("relative/case").isAbsolute()) return 3;
     if (!cwd().isAbsolute()) return 4;
+    if (fileName("C:/case").path() != fileName("C:/")) return 13;
+    if (fileName("C:/").path() != fileName("C:/")) return 14;
+    if (fileName("relative/case").path() != fileName("relative")) return 15;
     if (mag(int64_t(-4294967296LL)) != int64_t(4294967296LL)) return 5;
     const void* low = reinterpret_cast<void*>(std::uintptr_t(1));
     const void* high = reinterpret_cast<void*>(std::uintptr_t(0x100000001ULL));

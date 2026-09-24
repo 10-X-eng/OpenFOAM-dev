@@ -299,6 +299,19 @@ Foam::fileName Foam::fileName::path() const
 {
     size_type i = rfind('/');
 
+#ifdef _WIN32
+    // The parent of C:/case is C:/, not the drive-relative path C:.
+    if
+    (
+        i == 2
+     && std::isalpha(static_cast<unsigned char>(operator[](0)))
+     && operator[](1) == ':'
+    )
+    {
+        return substr(0, 3);
+    }
+#endif
+
     if (i == npos)
     {
         return ".";
