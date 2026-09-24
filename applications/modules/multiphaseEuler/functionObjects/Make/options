@@ -18,6 +18,7 @@ EXE_INC = \
     -I$(LIB_SRC)/fvModels/general/lnInclude
 
 LIB_LIBS = \
+    -lmultiphaseEulerSolver \
     -lmeshTools \
     -lfiniteVolume \
     -lsampling \

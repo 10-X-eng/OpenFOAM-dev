@@ -8,6 +8,11 @@ EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
 
+ifeq ($(WM_ARCH),mingw64)
+# Include Foam::Time before CRT headers can cache the case-equivalent time.h.
+EXE_INC += -include $(LIB_SRC)/OpenFOAM/lnInclude/Time.H
+endif
+
 LIB_LIBS = \
     -lphysicalProperties \
     -lcompressibleMomentumTransportModels \
