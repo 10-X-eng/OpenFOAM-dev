@@ -1,4 +1,4 @@
-name: Native Windows serial package
+name: Native Windows full package
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
 jobs:
   windows:
     runs-on: windows-2022
-    timeout-minutes: 180
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -39,16 +39,23 @@ jobs:
           location: C:\
           update: true
           install: >-
-            git gcc make flex bison
+            git gcc make flex bison util-linux
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-zlib
             mingw-w64-ucrt-x86_64-libsystre
+            mingw-w64-ucrt-x86_64-msmpi
+            mingw-w64-ucrt-x86_64-metis
+            mingw-w64-ucrt-x86_64-parmetis
+            mingw-w64-ucrt-x86_64-scotch
+            mingw-w64-ucrt-x86_64-boost
+            mingw-w64-ucrt-x86_64-nsis
       - name: Compile Windows executables
         shell: msys2 {0}
         run: |
           set -o pipefail
           cd /c/of-build/OpenFOAM-dev
           JOBS=4 bash packaging/windows/build.sh 2>&1 | tee /c/of-build/build.log
+          bash packaging/windows/Test-DynamicCode.sh
       - name: Package and exercise the Windows-only runtime
         shell: pwsh
         env:
@@ -58,7 +65,9 @@ jobs:
           $output = Join-Path $env:GITHUB_WORKSPACE 'artifacts'
           & C:\of-build\OpenFOAM-dev\packaging\windows\Package.ps1 -OutputDirectory $output -MsysRoot $env:MSYS_ROOT
           $package = Get-ChildItem -LiteralPath $output -Directory | Select-Object -First 1
-          & C:\of-build\OpenFOAM-dev\packaging\windows\SmokeTest.ps1 -PackageDirectory $package.FullName
+          & C:\of-build\OpenFOAM-dev\packaging\windows\SmokeTest.ps1 -PackageDirectory $package.FullName -WorkDirectory (Join-Path $output 'validation')
+          & C:\of-build\OpenFOAM-dev\packaging\windows\Test-Applications.ps1 -PackageDirectory $package.FullName
+          & C:\of-build\OpenFOAM-dev\packaging\windows\MakeInstaller.ps1 -PackageDirectory $package.FullName -MsysRoot $env:MSYS_ROOT
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -66,6 +75,7 @@ jobs:
           path: |
             artifacts/*.zip
             artifacts/*.tar.gz
-            artifacts/**/run/smoke-cavity/log.*
+            artifacts/*-Setup.exe
+            artifacts/validation/**/log.*
             C:/of-build/build.log
           if-no-files-found: warn

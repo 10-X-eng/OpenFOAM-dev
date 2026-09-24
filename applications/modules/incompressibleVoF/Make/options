@@ -16,6 +16,10 @@ EXE_INC = \
     -I$(LIB_SRC)/sampling/lnInclude
 
 LIB_LIBS = \
+    -ltwoPhaseSolver \
+    -lVoFSolver \
+    -lbasicFluidSolver \
+    -ltwoPhaseMixture \
     -ltwoPhaseVoFSolver \
     -lphysicalProperties \
     -linterfaceCompression \

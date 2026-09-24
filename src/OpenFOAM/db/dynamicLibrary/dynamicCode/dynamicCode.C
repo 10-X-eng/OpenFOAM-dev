@@ -584,7 +584,11 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 
 bool Foam::dynamicCode::wmakeLibso() const
 {
+    #ifdef _WIN32
+    const string wmakeCmd("wmake.cmd -s libso \"" + codePath() + "\"");
+    #else
     const string wmakeCmd("wmake -s libso " + codePath());
+    #endif
 
     if (system(wmakeCmd))
     {

@@ -12,6 +12,10 @@ EXE_INC = \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 LIB_LIBS = \
+    -lphysicalProperties \
+    -lthermophysicalTransportModel \
+    -lfluidThermophysicalTransportModel \
+    -lfluidThermoThermophysicalTransportModels \
     -lbasicFluidSolver \
     -lfluidThermophysicalModels \
     -lmomentumTransportModels \

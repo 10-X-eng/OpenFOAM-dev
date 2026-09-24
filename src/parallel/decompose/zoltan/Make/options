@@ -12,3 +12,7 @@ LIB_LIBS = \
     $(if $(ZOLTAN_LIB_DIR),-L$(ZOLTAN_LIB_DIR)) \
     -L$(FOAM_EXT_LIBBIN)/$(FOAM_MPI) \
     -lzoltan
+
+ifeq ($(WM_ARCH),mingw64)
+LIB_LIBS += -ldecompositionMethods -lmsmpi
+endif

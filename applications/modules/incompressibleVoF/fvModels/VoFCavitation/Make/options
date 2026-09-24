@@ -12,5 +12,14 @@ EXE_INC = \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 LIB_LIBS = \
+    -ltwoPhaseVoFSolver \
+    -ltwoPhaseSolver \
+    -lVoFSolver \
+    -lbasicFluidSolver \
+    -lphysicalProperties \
+    -ltwoPhaseMixture \
+    -lincompressibleTwoPhases \
+    -lfiniteVolume \
+    -lmeshTools \
     -lincompressibleVoFSolver \
     -lincompressibleCavitationModels

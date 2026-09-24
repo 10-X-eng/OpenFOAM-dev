@@ -119,11 +119,24 @@ include $(GENERAL_RULES)/transform
 
 include $(FILES)
 ifeq ($(WM_ARCH),mingw64)
+    # The Windows loader compares DLL names without case, even on case-sensitive
+    # NTFS. Keep the newer Lagrangian framework distinct from legacy lagrangian.
+    LIB := $(patsubst %/libLagrangian,%/libLagrangianFramework,$(LIB))
+    LIB := $(patsubst %/libLagrangianFunctionObjects,%/libLagrangianFrameworkFunctionObjects,$(LIB))
+    LIB_LIBS := $(patsubst -lLagrangian,-lLagrangianFramework,$(LIB_LIBS))
+    LIB_LIBS := $(patsubst -lLagrangianFunctionObjects,-lLagrangianFrameworkFunctionObjects,$(LIB_LIBS))
+    EXE_LIBS := $(patsubst -lLagrangian,-lLagrangianFramework,$(EXE_LIBS))
+    EXE_LIBS := $(patsubst -lLagrangianFunctionObjects,-lLagrangianFrameworkFunctionObjects,$(EXE_LIBS))
+    LIB_LIBS := $(filter-out -L$(FOAM_LIBBIN)/dummy,$(LIB_LIBS))
+    EXE_LIBS := $(filter-out -L$(FOAM_LIBBIN)/dummy,$(EXE_LIBS))
+    LIB_LIBS += -L$(FOAM_LIBBIN)/$(FOAM_MPI)
+    EXE_LIBS += -L$(FOAM_LIBBIN)/$(FOAM_MPI)
     EXE := $(EXE).exe
     SEXE := $(SEXE).exe
-    LIB_LIBS += $(if $(filter libOpenFOAM,$(notdir $(LIB))),,-lOpenFOAM)
+    LIB_LIBS += -L$(FOAM_LIBBIN) $(if $(filter libOpenFOAM,$(notdir $(LIB))),,-lOpenFOAM)
     LINK_DEPS = $(if $(filter libOpenFOAM,$(notdir $(LIB))),$(FOAM_LIBBIN)/libOSspecific.o,)
     LINK_PRE_OBJECTS = $(LINK_DEPS)
+    EXE_LINK_DEPS = $(WM_PROJECT_DIR)/platforms/windows-include/application.o
 endif
 DEPENDENCIES=$(SOURCE:%=$(OBJECTS_DIR)/%.dep)
 BASENAMES=$(basename $(SOURCE))
@@ -167,7 +180,7 @@ all: $(EXE)
 silent:
 	@:
 
-$(EXE): $(OBJECTS) $(WM_DIR)/makefiles/general
+$(EXE): $(OBJECTS) $(WM_DIR)/makefiles/general $(EXE_LINK_DEPS)
 	@$(WM_SCRIPTS)/makeTargetDir $(EXE)
 	$(call QUIET_MESSAGE,ld,$(EXE))
 	$E $(LINKEXE) $(LINK_OBJECTS) -L$(LIB_PLATFORMS) \
@@ -177,7 +190,7 @@ $(EXE): $(OBJECTS) $(WM_DIR)/makefiles/general
 .PHONY: exe
 exe: $(SEXE) | silent
 
-$(SEXE): $(OBJECTS) $(WM_DIR)/makefiles/general
+$(SEXE): $(OBJECTS) $(WM_DIR)/makefiles/general $(EXE_LINK_DEPS)
 	@$(WM_SCRIPTS)/makeTargetDir $(SEXE)
 	$(call QUIET_MESSAGE,ld,$(SEXE))
 	$E $(LINKEXE) $(LINK_OBJECTS) $(EXE_LIBS) \

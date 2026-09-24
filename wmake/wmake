@@ -410,6 +410,13 @@ fi
 
 mkdir -p "$objectsDir"
 
+# Separate native Windows build groups may reach the same dependency. Serialize
+# each target before generating files/dependencies or writing linker responses.
+if [ "$WM_ARCH" = mingw64 ]; then
+    exec 9>"$objectsDir/.wmake.lock"
+    flock 9 || exit 1
+fi
+
 
 #------------------------------------------------------------------------------
 # Create $objectsDir/files from $MakeDir/files if necessary

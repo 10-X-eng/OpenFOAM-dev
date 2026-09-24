@@ -15,6 +15,7 @@ EXE_INC = \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 LIB_LIBS = \
+    -ltracking \
     -llagrangian \
     -lphysicalProperties \
     -lspecie \

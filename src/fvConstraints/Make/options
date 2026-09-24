@@ -12,6 +12,12 @@ EXE_INC = \
     -I$(LIB_SRC)/ThermophysicalTransportModels/fluid/lnInclude
 
 LIB_LIBS = \
+    -lphysicalProperties \
+    -lfluidThermophysicalModels \
+    -lsolidThermo \
+    -lspecie \
+    -lthermophysicalTransportModel \
+    -lfluidThermophysicalTransportModel \
     -lfiniteVolume \
     -lsampling \
     -lmeshTools \

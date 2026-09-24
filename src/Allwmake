@@ -21,9 +21,14 @@ wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
 # Update OpenFOAM version strings if required
 wmakePrintBuild -check || wrmo OpenFOAM/global/global.o 2>/dev/null
 
-Pstream/Allwmake $targetType $*
-
-OSspecific/${WM_OSTYPE:-POSIX}/Allwmake $targetType $*
+if [ "$WM_ARCH" = mingw64 ]; then
+    # PE DLLs cannot have the circular OpenFOAM/Pstream dependency used on ELF.
+    # The real MPI backend is compiled into OpenFOAM on Windows.
+    wmake libo OSspecific/MSwindows
+else
+    Pstream/Allwmake $targetType $*
+    OSspecific/${WM_OSTYPE:-POSIX}/Allwmake $targetType $*
+fi
 wmake $targetType OpenFOAM
 
 wmake $targetType fileFormats
@@ -33,7 +38,9 @@ wmake $targetType meshTools
 
 # Decomposition methods needed by dummyThirdParty
 # (dummy metis, scotch etc) needed by e.g. meshTools
-dummyThirdParty/Allwmake $targetType $*
+if [ "$WM_ARCH" != mingw64 ]; then
+    dummyThirdParty/Allwmake $targetType $*
+fi
 
 wmake $targetType finiteVolume
 

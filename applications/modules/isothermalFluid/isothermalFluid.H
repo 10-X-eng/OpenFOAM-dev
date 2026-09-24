@@ -54,6 +54,7 @@ See also
 #ifndef isothermalFluid_H
 #define isothermalFluid_H
 
+#include "Time.H"
 #include "basicFluidSolver.H"
 #include "fluidThermo.H"
 #include "compressibleMomentumTransportModel.H"

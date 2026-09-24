@@ -10,5 +10,6 @@ LIB_LIBS = \
     -lmeshTools \
     -lfiniteVolume \
     -lspecie \
+    -lphysicalProperties \
     -lfluidThermophysicalModels \
     -lmulticomponentThermophysicalModels

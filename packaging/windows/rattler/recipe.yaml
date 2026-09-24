@@ -1,0 +1,46 @@
+# Package the same validated native runtime used by the Windows installer.
+# OPENFOAM_PACKAGE points at the directory produced by Package.ps1.
+context:
+  version: ${{ env.get("OPENFOAM_VERSION", default="0.0.0") }}
+  revision: ${{ env.get("OPENFOAM_REVISION", default="local") }}
+
+package:
+  name: openfoam-foundation-native
+  version: ${{ version }}
+
+source:
+  path: ${{ env.get("OPENFOAM_PACKAGE") }}
+
+build:
+  number: 0
+  string: msmpi_${{ revision }}
+  skip: not win
+  script:
+    interpreter: powershell
+    content: |
+      $ErrorActionPreference = 'Stop'
+      $destination = Join-Path $env:PREFIX 'Library/OpenFOAM'
+      New-Item -ItemType Directory -Path $destination -Force | Out-Null
+      Copy-Item -Path (Join-Path $env:SRC_DIR '*') -Destination $destination -Recurse
+      # Conda manages MPI; the standalone installer bundles the same ABI locally.
+      foreach ($file in @('msmpi.dll', 'mpiexec.exe', 'smpd.exe')) {
+          Remove-Item -LiteralPath (Join-Path $destination "bin/$file")
+      }
+
+requirements:
+  run:
+    - msmpi >=10.1.1,<10.2
+
+tests:
+  - script:
+      - '"%PREFIX%\Library\OpenFOAM\OpenFOAM.exe" Test-Windows'
+      - '"%PREFIX%\Library\OpenFOAM\OpenFOAM.exe" Test-Windows --libraries'
+      - '"%PREFIX%\Library\OpenFOAM\OpenFOAM.exe" mpiexec -n 2 Test-Windows --mpi'
+      - '"%PREFIX%\Library\OpenFOAM\OpenFOAM.exe" foamDictionary -help'
+
+about:
+  homepage: https://openfoam.org
+  repository: https://github.com/10-X-eng/OpenFOAM-dev
+  license: GPL-3.0-or-later
+  license_file: COPYING
+  summary: OpenFOAM Foundation solvers and utilities for native Windows x64

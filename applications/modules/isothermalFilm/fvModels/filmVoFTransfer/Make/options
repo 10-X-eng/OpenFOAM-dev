@@ -22,5 +22,22 @@ EXE_INC = \
     -I$(LIB_SRC)/meshTools/lnInclude \
 
 LIB_LIBS = \
+    -lfilmCompressibleMomentumTransportModels \
+    -lphysicalProperties \
+    -lfluidThermophysicalModels \
+    -ltwoPhaseVoFSolver \
+    -ltwoPhaseSolver \
+    -lVoFSolver \
+    -lbasicFluidSolver \
+    -linterfaceCompression \
+    -linterfaceProperties \
+    -ltwoPhaseMixture \
+    -lcompressibleTwoPhases \
+    -lmomentumTransportModels \
+    -lcompressibleMomentumTransportModels \
+    -lphaseCompressibleMomentumTransportModels \
+    -lthermophysicalTransportModel \
+    -lfiniteVolume \
+    -lmeshTools \
     -lisothermalFilmSolver \
     -lcompressibleVoFSolver

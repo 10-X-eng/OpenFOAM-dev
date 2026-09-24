@@ -239,7 +239,11 @@ public:
         //  Corresponds to codeRoot()/libSubDir()/lib\<codeSha1Name\>.so
         fileName libPath() const
         {
+            #ifdef _WIN32
+            return codeRoot_/libSubDir_/"lib" + codeSha1Name_ + ".dll";
+            #else
             return codeRoot_/libSubDir_/"lib" + codeSha1Name_ + ".so";
+            #endif
         }
 
         //- Library path for specified code name relative to \$FOAM_CASE
@@ -247,7 +251,11 @@ public:
         //  dynamicCode/codeDirName()/libSubDir()/lib\<codeSha1Name\>.so
         fileName libRelPath() const
         {
+            #ifdef _WIN32
+            return codeRelPath()/libSubDir_/"lib" + codeSha1Name_ + ".dll";
+            #else
             return codeRelPath()/libSubDir_/"lib" + codeSha1Name_ + ".so";
+            #endif
         }
 
         HashTable<string>& varSubstitutions()

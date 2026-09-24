@@ -40,10 +40,12 @@ wmakeMpiLib()
     (
         version="$1"
         libName="$2"
+        separator=:
+        [ "$WM_ARCH" != mingw64 ] || separator=_
 
         WM_OPTIONS="$WM_OPTIONS$WM_MPLIB"
-        whichmpi="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/src/parallel/decompose/$libName/using:$FOAM_MPI"
-        whichtarget="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/src/parallel/decompose/$libName/using:$version"
+        whichmpi="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/src/parallel/decompose/$libName/using$separator$FOAM_MPI"
+        whichtarget="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/src/parallel/decompose/$libName/using$separator$version"
         [ -e "$whichmpi" -a -e "$whichtarget" ] || wclean -noLnInclude
         echo "wmake $targetType"
         wmake $targetType

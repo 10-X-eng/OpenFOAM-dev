@@ -11,4 +11,4 @@ cctoo = $(Ctoo)
 cpptoo = $(Ctoo)
 LINK_LIBS = $(c++DBUG)
 LINKLIBSO = $(CC) -shared -Wl,--export-all-symbols,--out-implib,$(LIB).dll.a
-LINKEXE = $(CC)
+LINKEXE = $(CC) $(WM_PROJECT_DIR)/platforms/windows-include/application.o

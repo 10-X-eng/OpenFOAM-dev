@@ -9,5 +9,11 @@ EXE_INC = \
     -I$(LIB_SRC)/twoPhaseModels/compressibleTwoPhases/lnInclude
 
 LIB_LIBS = \
+    -lmeshTools \
+    -lfiniteVolume \
+    -lphysicalProperties \
+    -lfluidThermophysicalModels \
+    -ltwoPhaseMixture \
+    -lcompressibleTwoPhases \
     -lphaseSystem \
     -lpopulationBalance

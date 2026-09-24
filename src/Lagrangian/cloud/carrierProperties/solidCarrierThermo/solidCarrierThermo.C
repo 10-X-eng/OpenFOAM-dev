@@ -98,5 +98,8 @@ Foam::solidCarrierThermo::New
 Foam::solidCarrierThermo::~solidCarrierThermo()
 {}
 
+Foam::solidCarrierThermo::implementation::~implementation()
+{}
+
 
 // ************************************************************************* //

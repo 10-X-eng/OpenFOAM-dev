@@ -1361,6 +1361,24 @@ void* dlOpen(const fileName& libName, const bool check)
         // Assume libName is of the form, lib<name>.so
         Foam::string winLibName(libName);
         winLibName.replace(".so", dllExt);
+        // Windows cannot distinguish the newer Lagrangian DLLs from legacy
+        // lagrangian DLLs by case. Preserve upstream dictionary names and map
+        // only the two colliding names to the native build's unique filenames.
+        const auto baseStart = winLibName.find_last_of("/\\") + 1;
+        const auto base = winLibName.substr(baseStart);
+        if (base == "libLagrangian.dll" || base == "libLagrangian" || base == "Lagrangian")
+        {
+            winLibName.replace(baseStart, string::npos, "libLagrangianFramework.dll");
+        }
+        else if
+        (
+            base == "libLagrangianFunctionObjects.dll"
+         || base == "libLagrangianFunctionObjects"
+         || base == "LagrangianFunctionObjects"
+        )
+        {
+            winLibName.replace(baseStart, string::npos, "libLagrangianFrameworkFunctionObjects.dll");
+        }
         void* libHandle = ::LoadLibrary(winLibName.c_str());
 
         if (NULL == libHandle)

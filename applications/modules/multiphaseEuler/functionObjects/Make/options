@@ -18,6 +18,17 @@ EXE_INC = \
     -I$(LIB_SRC)/fvModels/general/lnInclude
 
 LIB_LIBS = \
+    -lmeshTools \
+    -lfiniteVolume \
+    -lsampling \
+    -lphysicalProperties \
+    -lfluidThermophysicalModels \
+    -ltwoPhaseMixture \
+    -lcompressibleTwoPhases \
+    -lmomentumTransportModels \
+    -lcompressibleMomentumTransportModels \
+    -lphaseCompressibleMomentumTransportModels \
+    -lfvModels \
     -lphaseSystem \
     -lpopulationBalance \
     -lmultiphaseEulerFvModels \

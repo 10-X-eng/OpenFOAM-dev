@@ -15,4 +15,8 @@ LIB_LIBS = \
     -L$(FOAM_EXT_LIBBIN) \
     -lscotch \
     -lscotcherrexit \
-    -lrt
+    $(if $(filter mingw64,$(WM_ARCH)),,-lrt)
+
+ifeq ($(WM_ARCH),mingw64)
+LIB_LIBS += -ldecompositionMethods -lmsmpi
+endif

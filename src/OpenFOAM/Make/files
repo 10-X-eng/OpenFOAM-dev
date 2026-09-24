@@ -1,7 +1,8 @@
 ifeq ($(WM_ARCH),mingw64)
-../Pstream/dummy/UPstream.C
-../Pstream/dummy/UIPread.C
-../Pstream/dummy/UOPwrite.C
+../Pstream/mpi/UPstream.C
+../Pstream/mpi/UIPread.C
+../Pstream/mpi/UOPwrite.C
+../Pstream/mpi/PstreamGlobals.C
 endif
 
 global/global.Cver

@@ -18,4 +18,8 @@ LIB_LIBS = \
     -lptscotch \
     -lptscotcherrexit \
     -lscotch \
-    -lrt
+    $(if $(filter mingw64,$(WM_ARCH)),,-lrt)
+
+ifeq ($(WM_ARCH),mingw64)
+LIB_LIBS += -ldecompositionMethods -lmsmpi
+endif

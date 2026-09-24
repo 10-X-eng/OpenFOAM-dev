@@ -18,6 +18,18 @@ EXE_INC = \
     -I$(LIB_SRC)/meshTools/lnInclude \
 
 LIB_LIBS = \
+    -lfilmCompressibleMomentumTransportModels \
+    -lphysicalProperties \
+    -lfluidThermophysicalModels \
+    -lspecie \
+    -lmomentumTransportModels \
+    -lcompressibleMomentumTransportModels \
+    -linterfaceProperties \
+    -ltracking \
+    -lthermophysicalProperties \
+    -lmulticomponentThermophysicalModels \
+    -lfiniteVolume \
+    -lmeshTools \
     -lisothermalFilmSolver \
     -llagrangian \
     -llagrangianParcel
